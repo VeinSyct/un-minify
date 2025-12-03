@@ -1,36 +1,20 @@
 <textarea id="input" style="width:100%;height:200px;font-family:monospace;" placeholder="Paste minified HTML, CSS, or JS..."></textarea>
 <br>
-<button onclick="unminify({ tab: '    ', indent: 0, out: '', code: document.getElementById('input').value, inSingle: !1, inDouble: !1, inBacktick: !1 })">Unminify</button>
+<button onclick="unminify({ tab: 4, code: document.getElementById('input').value })">Unminify</button>
 <br><br>
 <textarea id="output" style="width:100%;height:200px;font-family:monospace;" placeholder="Formatted result..."></textarea>
+<script src="assets/js/beautify-css.js"></script>
+<script src="assets/js/beautify-html.js"></script>
+<script src="assets/js/beautify.js"></script>
 <script>
     let unminify = (d) => {
-        for (let i = 0; i < d.code.length; i++) {
-            let c = d.code[i];
-            if (!d.inSingle && !d.inDouble && !d.inBacktick) {
-                if (c === "'") { d.inSingle = true; d.out += c; continue; }
-                if (c === '"') { d.inDouble = true; d.out += c; continue; }
-                if (c === '`') { d.inBacktick = true; d.out += c; continue; }
-            } else {
-                if (d.inSingle  && c === "'" && d.code[i-1] !== '\\') d.inSingle = false;
-                if (d.inDouble  && c === '"' && d.code[i-1] !== '\\') d.inDouble = false;
-                if (d.inBacktick && c === '`' && d.code[i-1] !== '\\') d.inBacktick = false;
-                d.out += c;
-                continue;
-            }
-            if (c === '{') {
-                d.out += ' {\n' + d.tab.repeat(++d.indent);
-            } else if (c === '}') {
-                d.out += '\n' + d.tab.repeat(--d.indent) + '}';
-                if (d.code[i+1] !== ';') d.out += '\n' + d.tab.repeat(d.indent);
-            } else if (c === ';') {
-                d.out += ';\n' + d.tab.repeat(d.indent);
-            } else if (c === '<') {
-                if (d.out.trim().length > 0) d.out += '\n';
-                d.out += '<';
-            } else d.out += c;
-        }
-        d.out = d.out.replace(/\n\s*\n/g, '\n');
-        document.getElementById('output').value = d.out.trim();
+        if (d.code.startsWith('<'))
+            d.code = html_beautify(d.code, { indent_size: d.tab });
+        else if (d.code.includes('{') || d.code.includes(';')) {
+            if (d.code.includes('function') || d.code.includes('=>') || d.code.includes('var') || d.code.includes('let') || d.code.includes('const'))
+                d.code = js_beautify(d.code, { indent_size: d.tab });
+            else d.code = css_beautify(d.code, { indent_size: d.tab });
+        } else d.code = d.code;
+        document.getElementById('output').value = d.code.trim();
     }
 </script>

@@ -9,7 +9,7 @@ let minify = (d) => {
     d.code = d.code.replace(/(["'`])(?:\\[\s\S]|(?!\1).)*\1/g, (m)=>{d.strings.push(m); return `___STRING_${d.strings.length-1}___`;});
     d.code = d.code.replace(/\/\/.*$/gm, "");
     d.code = d.code.replace(/\s+/g," ");
-    d.code = d.code.replace(/\s*([=+\-*/%<>!&|?:;,{}()[\]])\s*/g,"$1");
+    d.code = d.code.replace(/\s*([\^=+\-*/%<>!&|?:;,{}()[\]])\s*/g,"$1");
     d.code = d.code.replace(/[,;]\}/g,"}");
     d.code = d.code.trim();
     d.code = d.code.replace(/___STRING_(\d+)___/g,(m,i)=>d.strings[i]);
